@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.retryBacklog = exports.queueDepth = exports.jobsEnqueued = exports.jobsFailed = exports.jobsSucceeded = exports.jobsProcessed = exports.registry = void 0;
+var prom_client_1 = require("prom-client");
+exports.registry = new prom_client_1.default.Registry();
+prom_client_1.default.collectDefaultMetrics({ register: exports.registry });
+exports.jobsProcessed = new prom_client_1.default.Counter({ name: 'jobs_processed_total', help: 'Total jobs processed' });
+exports.jobsSucceeded = new prom_client_1.default.Counter({ name: 'jobs_succeeded_total', help: 'Jobs succeeded' });
+exports.jobsFailed = new prom_client_1.default.Counter({ name: 'jobs_failed_total', help: 'Jobs failed' });
+exports.jobsEnqueued = new prom_client_1.default.Counter({ name: 'jobs_enqueued_total', help: 'Jobs enqueued' });
+exports.queueDepth = new prom_client_1.default.Gauge({ name: 'queue_depth', help: 'Approx queue depth' });
+exports.retryBacklog = new prom_client_1.default.Gauge({ name: 'retry_backlog', help: 'Retry set size' });
+exports.registry.registerMetric(exports.jobsProcessed);
+exports.registry.registerMetric(exports.jobsSucceeded);
+exports.registry.registerMetric(exports.jobsFailed);
+exports.registry.registerMetric(exports.jobsEnqueued);
+exports.registry.registerMetric(exports.queueDepth);
+exports.registry.registerMetric(exports.retryBacklog);

@@ -1,0 +1,34 @@
+services:
+  api:
+    build: .
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+      - POSTING_BASE_URL=http://mock:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+      - mock
+
+  worker:
+    build: .
+    command: ["node","dist/index.js","--worker-only"]
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - POSTING_BASE_URL=http://mock:8080
+      - PORT=3000
+    depends_on:
+      - redis
+      - mock
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  mock:
+    image: vinhopenfabric/mock-posting-service:latest
+    platform: linux/arm64
+    ports:
+      - "8080:8080"
