@@ -1,39 +1,35 @@
-import axios from 'axios';
-import { config } from './config.js';
-import type { Transaction } from './types.js';
+// src/postingClient.ts
+import type { Transaction } from "./types.js";
 
 export class PostingClient {
-  base = config.postingBaseUrl;
+  private baseUrl: string;
 
-  async getById(id: string) {
-    try {
-      const r = await axios.get(`${this.base}/transactions/${id}`, { timeout: 12000 });
-      return { exists: r.status === 200, data: r.data };
-    } catch (e: any) {
-      if (e?.response?.status === 404) return { exists: false };
-      throw e; // network or 5xx
-    }
+  constructor() {
+    this.baseUrl = process.env.POSTING_URL || "http://mock:4000";
   }
 
-  async post(tx: Transaction) {
-    // Mock service expects id, amount, currency, timestamp, description, metadata
-    const payload = {
-      id: tx.id,
-      amount: Number(tx.amount ?? 0),
-      currency: String(tx.currency ?? 'USD'),
-      timestamp: tx.timestamp ?? new Date().toISOString(),
-      description: tx.description ?? '',
-      metadata: tx.metadata ?? {}
-    };
-
-    const r = await axios.post(`${this.base}/transactions`, payload, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 15000
+  async post(tx: Transaction): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/transactions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tx),
     });
-    return r.data;
+
+    if (!res.ok) {
+      throw new Error(`Posting failed: ${res.status} ${res.statusText}`);
+    }
+    return res.json();
   }
 
-  async cleanup() {
-    return axios.post(`${this.base}/cleanup`);
+  async getById(id: string): Promise<{ exists: boolean }> {
+    const res = await fetch(`${this.baseUrl}/transactions/${id}`);
+
+    if (res.status === 404) {
+      return { exists: false };
+    }
+    if (!res.ok) {
+      throw new Error(`GetById failed: ${res.status} ${res.statusText}`);
+    }
+    return { exists: true };
   }
 }
