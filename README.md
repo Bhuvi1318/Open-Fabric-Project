@@ -119,6 +119,11 @@ $mockTransaction | Format-List
 k6 run k6-load.js
 ```
 
+## Sample output:
+
+<img width="1215" height="1066" alt="Screenshot 2025-08-19 110025" src="https://github.com/user-attachments/assets/0c586958-58b6-4a17-bb68-058aee3cf108" />
+
+
 
 
 
