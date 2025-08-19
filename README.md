@@ -1,4 +1,55 @@
- # OpenFabric: Transaction Mock Service
+# OpenFabric Transaction Processing System
+
+## Problem Statement
+In payment systems, external posting services are often **slow, unreliable, or fail randomly**.  
+We need a solution that:
+- Accepts transactions from clients.
+- Processes them **asynchronously** (without blocking API calls).
+- Ensures **no duplicate transactions**.
+- Retries on failures with safe limits.
+- Protects the system using a **circuit breaker**.
+- Validates performance using **load testing**.
+
+---
+
+## How It Works
+1. **Client submits a transaction** via REST API.  
+2. API stores it in **SQLite** with `PENDING` status.  
+3. **Worker service** (background job) reads pending transactions.  
+4. Worker tries to post them to the **mock posting service**.  
+   - On success → mark as `COMPLETED`.  
+   - On failure → retry with backoff.  
+   - If too many failures → circuit breaker opens.  
+5. **Transaction status API** lets clients check current state.  
+
+---
+
+## Worker (`worker.ts`)
+- Continuously polls for pending transactions.  
+- Ensures **idempotency** (same transaction not processed twice).  
+- Implements:
+  - **Retry logic** (for temporary errors).  
+  - **Circuit breaker** (skip processing if service is unstable).  
+- Updates database after each attempt.  
+
+This makes the system **reliable and resilient** even if the external service is slow.
+
+---
+
+## k6 Load Test
+- Tool used to **simulate many clients** sending transactions at once.  
+- Validates:
+  - Throughput (requests per second).  
+  - Latency (response times).  
+  - Failure rate under heavy load.  
+- Helps prove the system can **scale and stay stable**.  
+ 
+ 
+ 
+ 
+ 
+ 
+# OpenFabric: Transaction Mock Service
 
 This repository demonstrates a mock transaction posting service with worker processing and k6 load testing.
 
