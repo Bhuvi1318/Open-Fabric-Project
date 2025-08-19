@@ -46,7 +46,7 @@ docker ps
 npm run worker
 ```
 
-## Submit a transaction manually (PowerShell)
+## Step 3: Submit a transaction manually (PowerShell)
 ```powershell
 $baseUrl = "http://localhost:3000"
 $transactionId = "tx-101"
