@@ -1,34 +1,39 @@
 services:
   api:
     build: .
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - PORT=3000
-      - POSTING_BASE_URL=http://mock:8080
+    container_name: openfabric-api
+    command: npx tsx src/server.ts
     ports:
       - "3000:3000"
+    volumes:
+      - .:/app
     depends_on:
       - redis
       - mock
+    environment:
+      - POSTING_URL=http://mock:4000
 
   worker:
     build: .
-    command: ["node","dist/index.js","--worker-only"]
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - POSTING_BASE_URL=http://mock:8080
-      - PORT=3000
+    container_name: openfabric-worker
+    command: npx tsx src/workerMain.ts
+    volumes:
+      - .:/app
     depends_on:
       - redis
       - mock
 
+
   redis:
     image: redis:7-alpine
+    container_name: redis-db
     ports:
       - "6379:6379"
 
   mock:
-    image: vinhopenfabric/mock-posting-service:latest
-    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-posting
     ports:
-      - "8080:8080"
+      - "4000:8080"
